@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>iOS 快速使用指南</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #8b1f1f;
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+    }
+    .step {
+      margin-bottom: 25px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 4px solid #8b1f1f;
+    }
+    .step h2 {
+      color: #8b1f1f;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .step p {
+      line-height: 1.8;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    .step ol, .step ul {
+      margin-left: 20px;
+      line-height: 1.8;
+      color: #555;
+    }
+    .step li {
+      margin-bottom: 8px;
+    }
+    .tip {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .tip strong {
+      color: #856404;
+    }
+    .button {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: #8b1f1f;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: bold;
+      margin-top: 20px;
+      transition: background 0.3s;
+    }
+    .button:hover {
+      background: #b53b3b;
+    }
+    .warning {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      color: #721c24;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📱 iOS 使用指南</h1>
+    
+    <div class="step">
+      <h2>方法一：使用 Safari 浏览器（最简单）</h2>
+      <ol>
+        <li>将 <code>窗帘报价计算器_手机版.html</code> 文件通过以下方式传到 iPhone：
+          <ul>
+            <li>AirDrop（如果使用 Mac）</li>
+            <li>微信/QQ 文件传输</li>
+            <li>iCloud Drive</li>
+            <li>邮件附件</li>
+          </ul>
+        </li>
+        <li>在 iPhone 上打开"文件"应用</li>
+        <li>找到并点击 HTML 文件</li>
+        <li>选择"在 Safari 中打开"</li>
+        <li><strong>重要：</strong>点击 Safari 底部的"分享"按钮 → "添加到主屏幕"</li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <h2>方法二：通过微信/QQ 打开</h2>
+      <ol>
+        <li>将 HTML 文件发送到微信/QQ（文件或收藏）</li>
+        <li>在微信/QQ 中点击文件</li>
+        <li>选择"用其他应用打开"</li>
+        <li>选择"Safari 浏览器"</li>
+        <li>添加到主屏幕以便快速访问</li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <h2>方法三：使用在线版本（推荐）</h2>
+      <p>将文件上传到以下任一服务，获得网址后可以直接访问：</p>
+      <ul>
+        <li><strong>GitHub Pages</strong>（免费，需要 GitHub 账号）</li>
+        <li><strong>Netlify Drop</strong>（免费，直接拖拽上传）</li>
+        <li><strong>Vercel</strong>（免费，支持拖拽）</li>
+        <li><strong>CodePen</strong>（在线编辑和分享）</li>
+      </ul>
+      <p>上传后获得网址，在 Safari 中打开，然后添加到主屏幕。</p>
+    </div>
+
+    <div class="warning">
+      <strong>⚠️ 为什么 Chrome 无法打开？</strong><br>
+      iOS 上的 Chrome 使用的是 Safari 的 WebKit 引擎，并且受到系统限制，无法直接访问本地文件。这是 iOS 的安全策略，所有浏览器都受此限制。
+    </div>
+
+    <div class="tip">
+      <strong>💡 最佳实践：</strong><br>
+      添加到主屏幕后，这个页面会像 App 一样运行，可以离线使用基本功能，体验更好！
+    </div>
+
+    <a href="窗帘报价计算器_手机版.html" class="button">如果已正确打开，点击这里使用计算器</a>
+  </div>
+</body>
+</html>
+

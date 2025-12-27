@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>窗帘报价计算器</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    /* ============================================
+       颜色变量定义
+       ============================================ */
+    :root {
+      --ink: #26212a;
+      --muted: #6e6a75;
+      --paper: #fffaf7;
+      --accent: #8b1f1f;
+      --accent-2: #b53b3b;
+      --line: #efe3df;
+      --soft: #f8f1ee;
+      --card: #ffffff;
+    }
+
+    /* ============================================
+       基础样式重置
+       ============================================ */
+    * { 
+      box-sizing: border-box; 
+    }
+
+    /* ============================================
+       页面主体样式
+       ============================================ */
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, #f9e6e1 0%, transparent 55%),
+        radial-gradient(circle at 80% 10%, #f3e6ec 0%, transparent 40%),
+        #f7f2ef;
+      color: var(--ink);
+      font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+      font-weight: 500;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 0.3s ease;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 36px 20px 60px;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ============================================
+       主容器样式
+       ============================================ */
+    .sheet {
+      width: min(1080px, 100%);
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: 
+        0 28px 60px rgba(55, 18, 18, 0.12),
+        0 0 0 1px rgba(139, 31, 31, 0.05);
+      overflow: hidden;
+      position: relative;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .sheet:hover {
+      box-shadow: 
+        0 32px 70px rgba(55, 18, 18, 0.15),
+        0 0 0 1px rgba(139, 31, 31, 0.08);
+    }
+
+    /* ============================================
+       顶部栏样式
+       ============================================ */
+    .topbar {
+      background: linear-gradient(135deg, #7a1a1a 0%, #9c2b2b 50%, #7a1a1a 100%);
+      color: #fff;
+      padding: 28px 36px 34px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topbar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .brand small {
+      text-transform: uppercase;
+      font-size: 12px;
+      opacity: 0.9;
+      letter-spacing: 3px;
+    }
+
+    .brand h1 {
+      margin: 10px 0 6px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    .meta {
+      text-align: right;
+      font-size: 13px;
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+      font-weight: 500;
+      display: grid;
+      gap: 6px;
+    }
+
+    .meta label {
+      display: block;
+      font-size: 12px;
+      opacity: 0.9;
+      letter-spacing: 1px;
+    }
+
+    .meta input {
+      width: 220px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .meta input::placeholder { color: rgba(255,255,255,0.7); }
+
+    .meta input:focus {
+      outline: 2px solid rgba(255,255,255,0.35);
+    }
+
+    .table-wrap {
+      padding: 26px 34px 10px;
+      overflow-x: auto;
+    }
+
+    /* ============================================
+       表格样式
+       ============================================ */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+      font-weight: 500;
+      min-width: 1100px;
+      line-height: 1.6;
+      table-layout: auto;
+      background: var(--card);
+    }
+
+    thead th {
+      text-align: left;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 14px 6px;
+      border-bottom: 2px solid var(--accent);
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      line-height: 1.6;
+      background: linear-gradient(to bottom, rgba(139, 31, 31, 0.02), transparent);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+
+    tbody tr::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+    }
+
+    tbody tr {
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--soft);
+    }
+
+    tbody tr:hover {
+      background: rgba(139, 31, 31, 0.03);
+      transform: scale(1.001);
+    }
+
+    td {
+      padding: 14px 6px;
+      vertical-align: middle;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    .area {
+      min-width: 80px;
+      width: 80px;
+      color: #3b2c2c;
+      font-weight: 600;
+      line-height: 1.6;
+    }
+    
+    .area-input {
+      line-height: 1.6 !important;
+      padding: 10px 8px !important;
+      width: 100%;
+      min-width: 60px;
+      font-size: 13px;
+    }
+
+    .item {
+      font-weight: 600;
+      min-width: 60px;
+    }
+
+    .item-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .item-splice {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .item-input-main {
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 8px 6px !important;
+    }
+
+    .item-input-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+      line-height: 1.5;
+      padding: 8px 6px !important;
+    }
+
+    .spec {
+      color: #4b4b56;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      min-width: 160px;
+      line-height: 1.6;
+    }
+
+    .spec-inputs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .spec-inputs input {
+      width: 90px;
+      text-align: center;
+      line-height: 1.6 !important;
+      padding: 10px 10px !important;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .num {
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      min-width: 100px;
+    }
+
+    .num .input {
+      text-align: center;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input, select, textarea, button {
+      font-family: inherit;
+    }
+
+    .input {
+      width: 100%;
+      padding: 10px 10px;
+      border: 1px solid #d9cfcf;
+      border-radius: 8px;
+      background: #fffaf7;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.6;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    .unit-input {
+      min-width: 120px;
+      text-align: center;
+      line-height: 1.6 !important;
+      padding: 10px 10px !important;
+    }
+    
+    .price-input,
+    .qty-input {
+      line-height: 1.6 !important;
+      padding: 10px 10px !important;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    .input:focus {
+      outline: 2px solid rgba(139, 31, 31, 0.2);
+      border-color: var(--accent);
+      background: #fffdfb;
+      box-shadow: 0 0 0 3px rgba(139, 31, 31, 0.1);
+      transform: translateY(-1px);
+      transition: all 0.2s ease;
+    }
+
+    .input:hover:not(:focus) {
+      border-color: rgba(139, 31, 31, 0.3);
+      transition: border-color 0.2s ease;
+    }
+
+    .action-cell {
+      position: relative;
+      width: 52px;
+    }
+
+    /* ============================================
+       删除按钮样式
+       ============================================ */
+    .del-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: none;
+      background: rgba(139, 31, 31, 0.08);
+      color: #8b1f1f;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1;
+      box-shadow: 0 2px 4px rgba(139, 31, 31, 0.1);
+    }
+
+    .del-btn:hover {
+      background: rgba(139, 31, 31, 0.2);
+      transform: translateY(-2px) scale(1.1);
+      box-shadow: 0 4px 8px rgba(139, 31, 31, 0.2);
+    }
+
+    .del-btn:active {
+      transform: translateY(0) scale(0.95);
+      box-shadow: 0 1px 2px rgba(139, 31, 31, 0.15);
+    }
+
+    .add-row {
+      margin: 12px 34px 0;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    /* ============================================
+       按钮样式
+       ============================================ */
+    .primary-btn {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 
+        0 6px 16px rgba(139, 31, 31, 0.25),
+        0 2px 4px rgba(139, 31, 31, 0.15);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .primary-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .primary-btn:hover {
+      background: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 100%);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 8px 20px rgba(139, 31, 31, 0.35),
+        0 4px 8px rgba(139, 31, 31, 0.2);
+    }
+
+    .primary-btn:hover::before {
+      left: 100%;
+    }
+
+    .primary-btn:active {
+      transform: translateY(0);
+      box-shadow: 
+        0 4px 12px rgba(139, 31, 31, 0.3),
+        0 2px 4px rgba(139, 31, 31, 0.15);
+    }
+
+    /* ============================================
+       总计区域样式
+       ============================================ */
+    .total {
+      padding: 22px 36px 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 20px;
+      border-top: 2px solid var(--accent);
+      background: linear-gradient(135deg, #fff6f3 0%, #fff9f7 100%);
+      position: relative;
+    }
+
+    .total::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .total .label {
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .total .amount {
+      font-size: 32px;
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-align: right;
+    }
+
+    .note-box {
+      padding: 0 36px 28px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .note-box label {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.4px;
+      font-weight: 600;
+    }
+
+    textarea.note-input {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px 12px;
+      border: 1px solid #d9cfcf;
+      border-radius: 10px;
+      background: #fffaf7;
+      font-size: 14px;
+      resize: vertical;
+      font-weight: 500;
+    }
+
+    textarea.note-input:focus {
+      outline: 2px solid rgba(139, 31, 31, 0.2);
+      border-color: var(--accent);
+      background: #fffdfb;
+    }
+
+    .footer {
+      padding: 0 36px 34px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .sign {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    /* ============================================
+       保存按钮样式
+       ============================================ */
+    .save-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 
+        0 4px 12px rgba(139, 31, 31, 0.3),
+        0 2px 6px rgba(139, 31, 31, 0.2);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .save-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .save-btn:hover {
+      background: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 100%);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 
+        0 8px 20px rgba(139, 31, 31, 0.4),
+        0 4px 10px rgba(139, 31, 31, 0.3);
+    }
+
+    .save-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .save-btn:active {
+      transform: translateY(-1px) scale(1);
+    }
+
+    .save-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @media (max-width: 900px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        text-align: left;
+      }
+      .meta { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="sheet">
+      <div class="topbar">
+        <div class="brand">
+              <small>QUOTATION</small>
+              <h1>恋家整体软装</h1>
+              <p>软装窗帘定制 · 尺寸与用量明细</p>
+        </div>
+        <div class="meta">
+              <label for="proj">项目名称 / Project</label>
+              <input id="proj" type="text" placeholder="" />
+              <label for="dateInput">日期 / Date</label>
+              <input id="dateInput" type="date" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width: 80px; width: 80px;">区域</th>
+              <th style="min-width: 60px;">项目 / Item</th>
+              <th class="center">规格 (宽 × 高)</th>
+              <th class="num" style="min-width: 100px; width: 100px;">单价</th>
+              <th class="center">计价单位</th>
+              <th class="num" style="min-width: 100px;">用量 (米)</th>
+              <th class="num" style="min-width: 100px;">金额</th>
+              <th class="center" style="width:60px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="add-row">
+        <button class="primary-btn" id="addRowBtn">+ 新增一行</button>
+        <button class="primary-btn" id="importBtn" style="background: #4a90e2;">导入数据</button>
+        <input type="file" id="importFile" accept=".json" style="display: none;" />
+      </div>
+
+      <div class="total">
+        <div>
+          <div class="label">TOTAL AMOUNT</div>
+          <div class="note">价格自动合计 · 支持米 / 平方米计价</div>
+        </div>
+        <div class="amount" id="totalAmount">¥0.00</div>
+      </div>
+
+      <div class="note-box">
+        <label for="note">备注 / Notes（可输入面料倍数、安装说明等）</label>
+        <textarea id="note" class="note-input" placeholder="示例：品牌布艺用料2.2倍起算，品牌纱均按2倍；含安装服务。"></textarea>
+      </div>
+
+      <div class="footer">
+        <div class="sign">客户签字 / Client</div>
+        <div class="sign">日期 / Date</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================
+       变量初始化
+       ============================================ */
+    const rowsEl = document.getElementById('rows');
+    const totalEl = document.getElementById('totalAmount');
+    const dateInput = document.getElementById('dateInput');
+    const projInput = document.getElementById('proj');
+    const noteInput = document.getElementById('note');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+    const saveBtn = document.createElement('button');
+    saveBtn.id = 'saveBtn';
+    saveBtn.className = 'save-btn';
+    saveBtn.textContent = '保存为图片';
+    document.body.appendChild(saveBtn);
+
+    // 默认日期为今天，可手动修改
+    const todayStr = new Date().toISOString().slice(0, 10);
+    dateInput.value = todayStr;
+
+    /* ============================================
+       工具函数
+       ============================================ */
+    const formatMoney = (n) => Number(n || 0).toFixed(2);
+    const formatMoneyWithSymbol = (n) => '¥' + formatMoney(n);
+
+    /* ============================================
+       创建表格行
+       ============================================ */
+    function createRow(data = {}) {
+      // 拆分规格为宽高数字（如果提供 spec 字符串）
+      let widthVal = data.width || '';
+      let heightVal = data.height || '';
+      if ((!widthVal || !heightVal) && data.spec) {
+        const parts = data.spec.split('×').map(s => s.trim());
+        if (parts.length === 2) {
+          widthVal = widthVal || parts[0];
+          heightVal = heightVal || parts[1];
+        }
+      }
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="area"><input class="input area-input" placeholder="区域" value="${data.area || ''}"></td>
+        <td class="item">
+          <div class="item-inputs">
+            <input class="input item-input-main" placeholder="项目名称" value="${data.item || ''}">
+            <input class="input item-input-sub" placeholder="型号 / 描述" value="${data.itemSub || ''}">
+            <div class="item-splice">
+              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 12px; white-space: nowrap; margin-top: 4px;">
+                <input type="checkbox" class="splice-checkbox" ${data.splice ? 'checked' : ''} style="width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0;">
+                <span>拼接</span>
+              </label>
+              <input class="input fixed-width-input" type="number" step="0.01" min="0" placeholder="定宽" value="${data.fixedWidth ?? ''}" style="width: 60px; display: ${data.splice ? 'inline-block' : 'none'}; font-size: 12px; padding: 4px 6px; margin-left: 4px; vertical-align: middle;">
+            </div>
+          </div>
+        </td>
+        <td class="spec">
+          <div class="spec-inputs">
+            <input class="input width-input" type="number" step="0.01" min="0" placeholder="宽" value="${widthVal}">
+            <span>×</span>
+            <input class="input height-input" type="number" step="0.01" min="0" placeholder="高" value="${heightVal}">
+          </div>
+        </td>
+        <td class="num" style="min-width: 100px; width: 100px;"><input class="input price-input" type="number" step="0.01" min="0" placeholder="单价" value="${data.price ?? ''}"></td>
+        <td class="center">
+          <select class="input unit-input">
+            <option value="m" ${data.unit === 'm' ? 'selected' : ''}>元 / 米</option>
+            <option value="sqm" ${data.unit === 'sqm' ? 'selected' : ''}>元 / 平方米</option>
+          </select>
+        </td>
+        <td class="num">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <input class="input qty-input" type="number" step="0.01" min="0" placeholder="用量" value="${data.qty ?? ''}" style="width: 80px;">
+            <span class="qty-unit" style="font-size: 13px; color: var(--muted);">米</span>
+          </div>
+        </td>
+        <td class="num amount-cell">¥0.00</td>
+        <td class="center action-cell"><button class="del-btn" aria-label="删除行">×</button></td>
+      `;
+      attachRowEvents(tr);
+      rowsEl.appendChild(tr);
+      updateQtyUnit(tr); // 根据初始单位设置用量单位标签
+      recalcRow(tr);
+    }
+
+    function updateQtyUnit(tr) {
+      const unitSelect = tr.querySelector('.unit-input');
+      const qtyUnit = tr.querySelector('.qty-unit');
+      if (unitSelect && qtyUnit) {
+        const unit = unitSelect.value;
+        if (unit === 'sqm') {
+          qtyUnit.textContent = '㎡';
+        } else {
+          qtyUnit.textContent = '米';
+        }
+      }
+    }
+
+    function attachRowEvents(tr) {
+      // 输入框事件 - 定宽输入框不影响价格和金额计算
+      tr.querySelectorAll('.price-input, .qty-input, .width-input, .height-input').forEach(el => {
+        el.addEventListener('input', () => {
+          recalcRow(tr);
+          recalcTotal();
+        });
+      });
+      
+      // 拼接复选框事件 - 只用于标记，不影响计算
+      const spliceCheckbox = tr.querySelector('.splice-checkbox');
+      const fixedWidthInput = tr.querySelector('.fixed-width-input');
+      if (spliceCheckbox && fixedWidthInput) {
+        spliceCheckbox.addEventListener('change', () => {
+          const isChecked = spliceCheckbox.checked;
+          if (isChecked) {
+            fixedWidthInput.style.display = 'inline-block';
+            fixedWidthInput.focus(); // 自动聚焦到定宽输入框
+          } else {
+            fixedWidthInput.style.display = 'none';
+            fixedWidthInput.value = ''; // 清空定宽值
+          }
+          // 拼接选项不影响价格和金额，只用于标记
+        });
+      }
+      
+      // 单位选择事件 - 需要更新用量单位
+      const unitSelect = tr.querySelector('.unit-input');
+      if (unitSelect) {
+        unitSelect.addEventListener('change', () => {
+          updateQtyUnit(tr);
+          recalcRow(tr);
+          recalcTotal();
+        });
+      }
+      
+      tr.querySelector('.del-btn').addEventListener('click', () => {
+        tr.remove();
+        recalcTotal();
+        ensureAtLeastOneRow();
+      });
+    }
+
+
+    function recalcRow(tr) {
+      const price = parseFloat(tr.querySelector('.price-input').value) || 0;
+      const qty = parseFloat(tr.querySelector('.qty-input').value) || 0;
+      const amount = price * qty;
+      tr.querySelector('.amount-cell').textContent = formatMoneyWithSymbol(amount);
+      tr.dataset.amount = amount;
+    }
+
+    function recalcTotal() {
+      const sum = Array.from(rowsEl.querySelectorAll('tr')).reduce((acc, tr) => {
+        return acc + (parseFloat(tr.dataset.amount) || 0);
+      }, 0);
+      totalEl.textContent = formatMoneyWithSymbol(sum);
+    }
+
+    function ensureAtLeastOneRow() {
+      if (!rowsEl.querySelector('tr')) {
+        createRow();
+      }
+    }
+
+    document.getElementById('addRowBtn').addEventListener('click', () => {
+      createRow();
+      recalcTotal();
+    });
+
+    // 导入数据功能
+    importBtn.addEventListener('click', () => {
+      importFile.click();
+    });
+
+    importFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          
+          // 清空现有数据
+          rowsEl.innerHTML = '';
+          
+          // 填充基本信息
+          if (data.project) projInput.value = data.project;
+          if (data.date) dateInput.value = data.date;
+          if (data.note) noteInput.value = data.note;
+          
+          // 导入行数据
+          if (data.rows && Array.isArray(data.rows)) {
+            data.rows.forEach(rowData => {
+              createRow(rowData);
+            });
+          }
+          
+          recalcTotal();
+          
+          // 显示成功提示
+          const btn = importBtn;
+          const original = btn.textContent;
+          btn.textContent = '导入成功 ✓';
+          btn.style.background = '#52c41a';
+          setTimeout(() => {
+            btn.textContent = original;
+            btn.style.background = '#4a90e2';
+          }, 2000);
+          
+          // 重置文件输入
+          importFile.value = '';
+        } catch (error) {
+          console.error('导入失败:', error);
+          alert('导入失败：文件格式不正确，请确保是有效的JSON文件。');
+          importFile.value = '';
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // 预置一行示例，方便填写
+    createRow({ area: '客厅', item: '窗纱 (CS035-1)', itemSub: '透光纱帘', width: '4.10', height: '2.53', price: 88, unit: 'm', qty: 8.2 });
+    createRow({ area: '主卧', item: '布帘 (JR062-1)', itemSub: '遮光布帘', width: '2.66', height: '1.84', price: 150, unit: 'm', qty: 5.85 });
+    recalcTotal();
+
+    // 检测字体是否已加载
+    function checkFontLoaded(fontFamily) {
+      if (!document.fonts || !document.fonts.check) {
+        return Promise.resolve(true);
+      }
+      return new Promise((resolve) => {
+        // 尝试检测字体是否可用
+        const testFont = `16px ${fontFamily}`;
+        if (document.fonts.check(testFont)) {
+          resolve(true);
+        } else {
+          // 如果字体未加载，等待一段时间后重试
+          setTimeout(() => {
+            resolve(document.fonts.check(testFont));
+          }, 500);
+        }
+      });
+    }
+
+    // 等待字体加载完成
+    function waitForFonts() {
+      return new Promise(async (resolve) => {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+          // 检查中文字体是否已加载
+          const fontFamily = '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif';
+          await checkFontLoaded(fontFamily);
+          // 额外等待更长时间确保中文字体完全渲染
+          setTimeout(resolve, 800);
+        } else {
+          // 如果不支持 Font Loading API，等待更长时间
+          setTimeout(resolve, 1200);
+        }
+      });
+    }
+
+    // 确保所有元素都应用了正确的字体样式
+    function applyFontStyles(element) {
+      const fontFamily = '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif';
+      element.style.fontFamily = fontFamily;
+      element.style.fontWeight = '500';
+      
+      // 递归处理所有子元素
+      Array.from(element.children).forEach(child => {
+        applyFontStyles(child);
+      });
+    }
+
+    // 保存为图片
+    saveBtn.addEventListener('click', async () => {
+      const btn = saveBtn;
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '正在生成...';
+      try {
+        // 等待字体加载完成
+        await waitForFonts();
+        
+        // 强制浏览器重新渲染，确保字体正确显示
+        const sheet = document.querySelector('.sheet');
+        sheet.style.display = 'none';
+        sheet.offsetHeight; // 触发重排
+        sheet.style.display = '';
+        await new Promise(resolve => setTimeout(resolve, 100)); // 等待渲染完成
+        
+        const canvas = await html2canvas(sheet, {
+          backgroundColor: '#f7f2ef',
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
+          letterRendering: true, // 改善文字渲染，特别是中文字符
+          foreignObjectRendering: false,
+          removeContainer: false, // 保留容器以确保样式正确
+          imageTimeout: 0,
+          // 确保字体正确渲染
+          onclone: (clonedDoc) => {
+            // 在克隆的文档中确保所有元素都应用了正确的字体样式
+            const clonedSheet = clonedDoc.querySelector('.sheet');
+            if (clonedSheet) {
+              applyFontStyles(clonedSheet);
+              // 强制重新计算样式
+              clonedDoc.body.style.fontFamily = '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif';
+              clonedDoc.body.style.fontWeight = '500';
+              
+              // 确保所有文本元素都使用正确的字体和行高
+              const allElements = clonedDoc.querySelectorAll('*');
+              allElements.forEach(el => {
+                if (el.style) {
+                  if (!el.style.fontFamily) {
+                    el.style.fontFamily = '"Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif';
+                  }
+                  // 确保有足够的行高避免文字被裁剪
+                  if (!el.style.lineHeight || el.style.lineHeight === 'normal') {
+                    el.style.lineHeight = '1.6';
+                  }
+                }
+              });
+              
+              // 特别处理输入框，确保文字不被裁剪
+              const inputs = clonedDoc.querySelectorAll('input, select, textarea');
+              inputs.forEach(input => {
+                input.style.lineHeight = '1.6';
+                input.style.paddingTop = '10px';
+                input.style.paddingBottom = '10px';
+                // 添加垂直对齐确保文字居中
+                input.style.verticalAlign = 'middle';
+              });
+              
+              // 确保表格单元格有足够的垂直空间
+              const cells = clonedDoc.querySelectorAll('td, th');
+              cells.forEach(cell => {
+                cell.style.lineHeight = '1.6';
+                cell.style.paddingTop = '14px';
+                cell.style.paddingBottom = '14px';
+              });
+            }
+          }
+        });
+        const link = document.createElement('a');
+        const date = dateInput.value || todayStr;
+        link.download = `恋家整体软装报价_${date}.png`;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        btn.textContent = '已保存 ✓';
+        setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2000);
+      } catch (e) {
+        console.error(e);
+        btn.textContent = '保存失败';
+        setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2000);
+      }
+    });
+  </script>
+</body>
+</html>
+
